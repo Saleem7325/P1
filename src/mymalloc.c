@@ -36,7 +36,7 @@ node *next(void *ptr, int bsize){
 int outOfBounds(void *ptr, int bsize){
 	ptr = (char *)ptr;
 
-	if(ptr + sizeof(node) + bsize >= mem + MSIZE)
+	if(ptr + sizeof(node) + bsize > mem + MSIZE)
 		return 1;
 	return 0;	
 }
@@ -67,12 +67,14 @@ void coalesce(node *ptr){
 //to indicate that we have room in memory for the next call to mymalloc()
 void createNode(node *ptr, int oldSize){
 	int size = ptr->bsize;
-	char *nna = (char *)ptr;
-	nna = nna + sizeof(node) + size;
-	node *newNode = (node *)nna;	
-	newNode->available = 1;
-	newNode->bsize = oldSize-(size + sizeof(node));
-	coalesce(newNode);
+	if (sizeof(node) + 1 > oldSize-(size + sizeof(node))){
+		char *nna = (char *)ptr;
+		nna = nna + sizeof(node) + size;
+		node *newNode = (node *)nna;	
+		newNode->available = 1;
+		newNode->bsize = oldSize-(size + sizeof(node));
+		coalesce(newNode);
+	}
 }
 
 void *mymalloc(size_t size, char *file, int line){
