@@ -100,7 +100,7 @@ void *mymalloc(size_t size, char *file, int line){
 			createNode(ptr, oldSize);
 			void *r = (char *)ptr + sizeof(node);
 			return r;
-		else if(ptr->bsize == size){
+		}else if(ptr->bsize == size){
 			ptr->available = 0;
 			void *r = (char *)ptr + sizeof(node);
 			return r;	
