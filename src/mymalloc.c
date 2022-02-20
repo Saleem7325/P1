@@ -12,7 +12,6 @@ typedef struct metadata{
 	int available;	
 }node;
 
-<<<<<<< HEAD
 static char mem[MSIZE];
 static node *head = (node *)mem;
 
@@ -114,27 +113,6 @@ void *mymalloc(size_t size, char *file, int line){
 void myfree(void *ptr, char *file, int line){
 
 }
-=======
-typedef struct node{
-	int data;
-	int key;
-	struct node *next;
-};
-
-static char mem[4096];
-
-void *mymalloc(size_t size, char *file, int line){
-	FILE *fp;
-	fp = fopen(*file, "r+");
-
-}
-
-void free(void *ptr, char *file, int line){
-	FILE *fp;
-	char f = *file;
-	fp = fopen(f, "r+");
-	scanf("%s", fp);
->>>>>>> c89c57c7d11bd9eba13c6655bbcb4854fb89f1e8
 
 int main(int argc, char **argv){
 	printf("Size of node: %ld\n", sizeof(node));
