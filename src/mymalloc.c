@@ -112,8 +112,26 @@ void *mymalloc(size_t size, char *file, int line){
 
 }
 
-void myfree(void *ptr, char *file, int line){
-
+void myfree(void *ptr, char *file, int line){	
+	if(((ptr->bsize - 1) % sizeof(node)) != 0){
+		return "Error: calling free() with an address not at the start of the chunk";
+	}
+	if(ptr->available){
+		return "Error: calling free() a second time on the same pointer/pointer is already freed";
+	}
+	if(ptr < &MSIZE[0] || ptr >= &MSIZE[4096]){
+		return "Error: calling free() with an address not obtained from malloc()";
+	}
+	if(ptr->bsize == &MSIZE[1]){
+		while(!ptr->available){
+			ptr->available = 1;
+			coalesce(ptr);
+			if(outOfBounds(ptr, ptr->bsize)){
+				return;
+			}
+			ptr = next(ptr, ptr->bsize);
+		}
+	}
 }
 
 int main(int argc, char **argv){
