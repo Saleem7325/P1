@@ -35,12 +35,29 @@ node *next(void *ptr, int bsize){
 //This accounts for the size of our metadata
 int outOfBounds(void *ptr, int bsize){
 	ptr = (char *)ptr;
+	char *last = (char *)(mem + MSIZE);
+	ptr =(char *)(ptr + sizeof(node) + bsize);
 
-	if(ptr + sizeof(node) + bsize > mem + MSIZE)
+	if( ptr == last || (void *)ptr > (void *)last )
 		return 1;
 	return 0;	
 }
 
+//Prints to stdout if blocks are available/not avaialable and block size inorder.
+void printMem(){
+	if(firstCall)
+		return;
+
+	int size = 1;
+	node *ptr = head;
+	printf("\nNode: %d\nAvailable: %d\nBlock Size: %d\n", size, ptr->available, ptr->bsize);
+		
+	while(outOfBounds(ptr, ptr->bsize)){
+		ptr = next(ptr, ptr->bsize);
+		size++;
+		printf("\nNode: %d\nAvailable: %d\nBlock Size: %d\n", size, ptr->available, ptr->bsize);
+	}	
+}
 
 //Checks wheter ptr is last block in mem if so it returns.
 //Otherwise it adds the block size of all the contiguous free blocks adjacent to ptr in the linked list
@@ -55,7 +72,7 @@ void coalesce(node *ptr){
 		ptr->bsize = ptr->bsize + sizeof(node) + nnode->bsize;
 		if(outOfBounds(ptr, ptr->bsize))
 			return;
-		nnode = next(ptr, ptr->bsize);
+		nnode = next(nnode, nnode->bsize);
 	}
 	return;
 }
@@ -83,14 +100,15 @@ void *mymalloc(size_t size, char *file, int line){
 		head->available = 1;
 		head->bsize = MSIZE - sizeof(node);		
 	}
-
+	printMem();
+	printf("\nMem address: %p\nMem[4096] address: %p\n", mem, mem + 4096);
 	node *ptr = head;
 	while(1){
 		while(!ptr->available){
 			if(outOfBounds(ptr, ptr->bsize))
 				return NULL;
 
-			ptr = next(ptr, size);	
+			ptr = next(ptr, ptr->bsize);	
 		}
 		coalesce(ptr);
 		if(ptr->bsize < size && (!outOfBounds(ptr, ptr->bsize)) )
@@ -101,10 +119,12 @@ void *mymalloc(size_t size, char *file, int line){
 			ptr->available = 0;
 			createNode(ptr, oldSize);
 			void *r = (char *)ptr + sizeof(node);
+			printMem();
 			return r;
 		}else if(ptr->bsize == size){
 			ptr->available = 0;
 			void *r = (char *)ptr + sizeof(node);
+			printMem();
 			return r;	
 		}else
 			return NULL;		
@@ -113,16 +133,16 @@ void *mymalloc(size_t size, char *file, int line){
 }
 
 void myfree(void *ptr, char *file, int line){	
-	if(((ptr->bsize - 1) % sizeof(node)) != 0){
-		return "Error: calling free() with an address not at the start of the chunk";
+/*	if(((ptr->bsize - 1) % sizeof(node)) != 0){
+		puts("Error: calling free() with an address not at the start of the chunk");
 	}
 	if(ptr->available){
-		return "Error: calling free() a second time on the same pointer/pointer is already freed";
+		puts("Error: calling free() a second time on the same pointer/pointer is already freed");
 	}
-	if(ptr < &MSIZE[0] || ptr >= &MSIZE[4096]){
-		return "Error: calling free() with an address not obtained from malloc()";
+	if(ptr < mem || ptr >= mem){
+		puts("Error: calling free() with an address not obtained from malloc()");
 	}
-	if(ptr->bsize == &MSIZE[1]){
+	if(ptr->bsize == mem){
 		while(!ptr->available){
 			ptr->available = 1;
 			coalesce(ptr);
@@ -131,9 +151,6 @@ void myfree(void *ptr, char *file, int line){
 			}
 			ptr = next(ptr, ptr->bsize);
 		}
-	}
+	}*/
 }
 
-int main(int argc, char **argv){
-	printf("Size of node: %ld\n", sizeof(node));
-}
