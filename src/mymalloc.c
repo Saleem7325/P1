@@ -101,13 +101,12 @@ void *mymalloc(size_t size, char *file, int line){
 		head->bsize = MSIZE - sizeof(node);		
 	}
 	printMem();
-	printf("\nMem address: %p\nMem[4096] address: %p\n", mem, mem + 4096);
+	printf("\nMem address: %p\nMem[4096] address: %p\n", mem, mem + MSIZE);
 	node *ptr = head;
 	while(1){
 		while(!ptr->available){
 			if(outOfBounds(ptr, ptr->bsize))
 				return NULL;
-
 			ptr = next(ptr, ptr->bsize);	
 		}
 		coalesce(ptr);
@@ -133,24 +132,45 @@ void *mymalloc(size_t size, char *file, int line){
 }
 
 void myfree(void *ptr, char *file, int line){	
-/*	if(((ptr->bsize - 1) % sizeof(node)) != 0){
-		puts("Error: calling free() with an address not at the start of the chunk");
+	char* p = ptr;
+	if(p < mem || p >= mem + MSIZE){ // compare if p (ptr) is in bounds of mem[MSIZE]
+		printf("Error: calling free() with an address not obtained from malloc() at %s, line %d.\n", __FILE__, __LINE__ );
+		return;
 	}
-	if(ptr->available){
-		puts("Error: calling free() a second time on the same pointer/pointer is already freed");
-	}
-	if(ptr < mem || ptr >= mem){
-		puts("Error: calling free() with an address not obtained from malloc()");
-	}
-	if(ptr->bsize == mem){
-		while(!ptr->available){
-			ptr->available = 1;
-			coalesce(ptr);
-			if(outOfBounds(ptr, ptr->bsize)){
+	int i = 0;
+	while(i < MSIZE){ //iterate through mem.length
+		node* curr = (node*)(mem + i);  //if so create node pointing to that address (unsure if incorrect and shld change to curr = &mem[i])
+		if(p == &mem[i]){ //check if p points to the current address
+			if(curr->available == 0){
+				curr->available = 1; //free address
+				coalesce(curr); 
+				printf("Address: %p, available: %d \n", curr, curr->available);
+				return;
+			}else{ // if available/already freed print error
+				printf("Address: %p, available: %d ", curr, curr->available);
+				printf("Error: address freed already at %s, line %d.\n", __FILE__, __LINE__); 
 				return;
 			}
-			ptr = next(ptr, ptr->bsize);
 		}
-	}*/
+		i += sizeof(node); // if not iterate to the start of the next block address
+	}
+	printf("Error: address not at the start of the chunk at %s, line %d.\n", __FILE__, __LINE__); // print error if address was not at the start of a block
 }
+/*
+int main(int argc, char **argv){
+	printf("Size of node: %lld\n", sizeof(node));
+	mymalloc(sizeof(char), __FILE__, __LINE__);
+//	mymalloc(sizeof(char), __FILE__, __LINE__);
+	int x = 5;
+	void * ptr = (mem);
+	void *p = ptr;
+	printf("ptr %p\n", ptr);
+	myfree(ptr, __FILE__, __LINE__);
+	myfree(p, __FILE__, __LINE__);
+	myfree(&x, __FILE__, __LINE__);
+	void* ptr2 = (mem+sizeof(char));
+	myfree(ptr2, __FILE__, __LINE__);
+
+}
+*/
 
