@@ -13,6 +13,11 @@ void freePtr(char *p[], int b){
 	}
 }
 
+void setNULL(char *p[]){
+	for(int i = 0; i < 120; i++)
+		p[i] = NULL;
+}
+
 void test1(){
 	for(int i = 0; i < 120; i++){
 		char *ptr = malloc(sizeof(char));
@@ -31,10 +36,12 @@ void test3(){
 	int malCount = 0;
 	int size = 0;
 	char *p[120];
+	setNULL(p);
+
 	while(malCount < 120){
 		int r = rand() % 100000;
 		if(r%2){
-			int r1 = rand() % 121;
+			int r1 = rand() % 120;
 			if(p[r1] == NULL){
 				p[r1] = malloc(sizeof(char));
 				malCount++;
@@ -50,20 +57,22 @@ void test3(){
 
 //Specified in Section 4(1-3) of p1.pdf
 int main(int argc, char** argv){
-/*	test1();
+	test1();
 	test2();
-	test3();*/
+	test3();
 
-	int *p = (int *)malloc(sizeof(int) * 10);
+/*	int *p = (int *)malloc(sizeof(int) * 10);
 //	double *ptr = (double *)malloc(sizeof(double)*10);	
+
 	for(int i = 0; i < 10; i++){
 		p[i] = i * (rand() % 100);
 //		ptr[i] = 1.0;
 	}
 
-	for(int i = 0; i < 10; i++){
+	for(int i = 0; i < 10; i++)
 		printf("\np[%d] = %d\n", i, p[i]); 
-		//printf("\nptr[%d] = %f\n", i, ptr[i]); 
-	
-	}
+
+	for(int i = 0; i < 10; i++)
+		printf("\nptr[%d] = %f\n", i, ptr[i]);*/	
+
 }

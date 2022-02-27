@@ -13,7 +13,8 @@ typedef struct metadata{
 }node;
 
 static char mem[MSIZE];
-static node *head = (node *)mem;
+// static node *head = (node *)mem;
+static node *head;
 
 //This is intially set to 1 to indicate to mymalloc 
 //if the client has  called mymalloc before.
@@ -35,10 +36,16 @@ node *next(void *ptr, int bsize){
 //This accounts for the size of our metadata
 int outOfBounds(void *ptr, int bsize){
 	ptr = (char *)ptr;
-	char *last = (char *)(mem + MSIZE);
-	ptr =(char *)(ptr + sizeof(node) + bsize);
 
-	if( ptr == last || (void *)ptr > (void *)last )
+
+//	char *last = (char *)(mem + MSIZE);
+	//ptr =(char *)(ptr + sizeof(node) + bsize);
+
+	unsigned long int ptrAddress = (unsigned long int)ptr;
+	unsigned long int last = (unsigned long int)(mem + MSIZE);
+	ptrAddress = (ptrAddress + sizeof(node) + bsize);
+
+	if(ptrAddress >= last /*|| (void *)ptr > (void *)last*/ )
 		return 1;
 	return 0;	
 }
@@ -83,8 +90,11 @@ void coalesce(node *ptr){
 //and creates a new node in the linked list at the end of the block that is in use
 //to indicate that we have room in memory for the next call to mymalloc()
 void createNode(node *ptr, int oldSize){
+
 	int size = ptr->bsize;
-	if (sizeof(node) + 1 > oldSize-(size + sizeof(node))){
+
+	if (sizeof(node) + 1 < oldSize-(size + sizeof(node))){
+
 		char *nna = (char *)ptr;
 		nna = nna + sizeof(node) + size;
 		node *newNode = (node *)nna;	
@@ -94,37 +104,85 @@ void createNode(node *ptr, int oldSize){
 	}
 }
 
+void *findAlignedAddress(void *ptr){
+	unsigned long int p = (unsigned long int)ptr;
+	unsigned long int i = 1;
+
+	while((p % 4) != 0)
+		p = p + i;
+
+	return (void *)p;
+}
+
+void init(){
+	char *p = mem;
+	unsigned long int pv = (unsigned long int)p;	
+
+	if((pv % 4) != 0)
+		 p = (char *)findAlignedAddress(p);
+	
+	head = (node *)p;
+	head->available = 1;
+
+	pv = (unsigned long int)head;
+	unsigned long int m = (unsigned long int)mem;
+
+	head->bsize =  ( 4096 - ( sizeof(node *) + (pv -  m) ) );
+}
+
+int findSize4(int size){
+	int p = size;
+	int i = 1;
+
+	while((p % 4) != 0)
+		p = p + i;
+
+	return p;
+}
+
 void *mymalloc(size_t size, char *file, int line){
+
 	if(firstCall){
 		firstCall = 0;
-		head->available = 1;
-		head->bsize = MSIZE - sizeof(node);		
+		init();
+	//	head->available = 1;
+	//	head->bsize = MSIZE - sizeof(node);		
 	}
-	printMem();
-	printf("\nMem address: %p\nMem[4096] address: %p\n", mem, mem + MSIZE);
+
+	if((size % 4) != 0)
+		size = findSize4(size);
+
 	node *ptr = head;
+
 	while(1){
+
+		//Find free node
 		while(!ptr->available){
 			if(outOfBounds(ptr, ptr->bsize))
 				return NULL;
+
 			ptr = next(ptr, ptr->bsize);	
 		}
+
 		coalesce(ptr);
+
 		if(ptr->bsize < size && (!outOfBounds(ptr, ptr->bsize)) )
 			ptr = next(ptr, ptr->bsize);
 		else if (ptr->bsize > size){
+
 			int oldSize = ptr->bsize;
 			ptr->bsize = size;	
 			ptr->available = 0;
 			createNode(ptr, oldSize);
 			void *r = (char *)ptr + sizeof(node);
-			printMem();
 			return r;
+
 		}else if(ptr->bsize == size){
+
 			ptr->available = 0;
 			void *r = (char *)ptr + sizeof(node);
-			printMem();
 			return r;	
+
 		}else
 			return NULL;		
 	}	
@@ -132,7 +190,7 @@ void *mymalloc(size_t size, char *file, int line){
 }
 
 void myfree(void *ptr, char *file, int line){	
-	char* p = ptr;
+char* p = ptr;
 	if(p < mem || p >= mem + MSIZE){ // compare if p (ptr) is in bounds of mem[MSIZE]
 		printf("Error: calling free() with an address not obtained from malloc() at %s, line %d.\n", __FILE__, __LINE__ );
 		return;
@@ -156,21 +214,4 @@ void myfree(void *ptr, char *file, int line){
 	}
 	printf("Error: address not at the start of the chunk at %s, line %d.\n", __FILE__, __LINE__); // print error if address was not at the start of a block
 }
-/*
-int main(int argc, char **argv){
-	printf("Size of node: %lld\n", sizeof(node));
-	mymalloc(sizeof(char), __FILE__, __LINE__);
-//	mymalloc(sizeof(char), __FILE__, __LINE__);
-	int x = 5;
-	void * ptr = (mem);
-	void *p = ptr;
-	printf("ptr %p\n", ptr);
-	myfree(ptr, __FILE__, __LINE__);
-	myfree(p, __FILE__, __LINE__);
-	myfree(&x, __FILE__, __LINE__);
-	void* ptr2 = (mem+sizeof(char));
-	myfree(ptr2, __FILE__, __LINE__);
-
-}
-*/
 
