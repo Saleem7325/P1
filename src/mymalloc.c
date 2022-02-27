@@ -93,7 +93,7 @@ void createNode(node *ptr, int oldSize){
 
 	int size = ptr->bsize;
 
-	if (sizeof(node) + 1 < oldSize-(size + sizeof(node))){
+	if (sizeof(node) + 4 < oldSize-(size + sizeof(node))){
 
 		char *nna = (char *)ptr;
 		nna = nna + sizeof(node) + size;
