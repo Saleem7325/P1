@@ -59,7 +59,7 @@ void printMem(){
 	node *ptr = head;
 	printf("\nNode: %d\nAvailable: %d\nBlock Size: %d\n", size, ptr->available, ptr->bsize);
 		
-	while(outOfBounds(ptr, ptr->bsize)){
+	while(!outOfBounds(ptr, ptr->bsize)){
 		ptr = next(ptr, ptr->bsize);
 		size++;
 		printf("\nNode: %d\nAvailable: %d\nBlock Size: %d\n", size, ptr->available, ptr->bsize);
@@ -190,28 +190,43 @@ void *mymalloc(size_t size, char *file, int line){
 }
 
 void myfree(void *ptr, char *file, int line){	
-char* p = ptr;
-	if(p < mem || p >= mem + MSIZE){ // compare if p (ptr) is in bounds of mem[MSIZE]
-		printf("Error: calling free() with an address not obtained from malloc() at %s, line %d.\n", __FILE__, __LINE__ );
+	if(firstCall){
+		printf("Error: calling free() with an address not obtained from malloc() in %s, at line %d.\n", __FILE__, __LINE__ );
 		return;
 	}
-	int i = 0;
-	while(i < MSIZE){ //iterate through mem.length
-		node* curr = (node*)(mem + i);  //if so create node pointing to that address (unsure if incorrect and shld change to curr = &mem[i])
-		if(p == &mem[i]){ //check if p points to the current address
-			if(curr->available == 0){
-				curr->available = 1; //free address
-				coalesce(curr); 
-				printf("Address: %p, available: %d \n", curr, curr->available);
-				return;
-			}else{ // if available/already freed print error
-				printf("Address: %p, available: %d ", curr, curr->available);
-				printf("Error: address freed already at %s, line %d.\n", __FILE__, __LINE__); 
-				return;
-			}
-		}
-		i += sizeof(node); // if not iterate to the start of the next block address
+	
+	char *p = (char *)ptr;
+	unsigned long int pv= (unsigned long int)p; 
+	unsigned long int first = (unsigned long int)mem;
+	unsigned long int last = (unsigned long int)(mem + MSIZE);
+
+	if(pv < first || pv >= last){
+		printf("Error: calling free() with an address not obtained from malloc() in %s, at line %d.\n", __FILE__, __LINE__ );
+		return;
 	}
-	printf("Error: address not at the start of the chunk at %s, line %d.\n", __FILE__, __LINE__); // print error if address was not at the start of a block
+	
+	node *curr = head;
+	unsigned long int cv = (unsigned long int)curr;
+
+	while(cv <= pv){
+		char *test = (char *)(cv + sizeof(node));
+		
+		if(test == p){
+				if(curr->available)
+					printf("Error: attempting to free a previously freed pointer in %s, at line %d.\n", __FILE__, __LINE__); 					
+				else
+					curr->available = 1;
+				coalesce(curr);
+				return;
+		}
+		
+		if(!outOfBounds(curr, curr->bsize)){
+			curr = (node *)next(curr, curr->bsize);
+			cv = (unsigned long int)curr;
+		}else
+			break;
+	}
+
+	printf("Error: attempting to free address not at the start of the chunk in %s, at line %d.\n", __FILE__, __LINE__);
 }
 

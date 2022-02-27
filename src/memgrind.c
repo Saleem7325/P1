@@ -8,6 +8,7 @@ void freePtr(char *p[], int b){
 	for(int i = 0; i < 120; i++){
 		if(p[i] != NULL){
 			free(p[i]);
+			p[i] = NULL;
 			if(b) return;
 		}
 	}
@@ -61,18 +62,27 @@ int main(int argc, char** argv){
 	test2();
 	test3();
 
-/*	int *p = (int *)malloc(sizeof(int) * 10);
-//	double *ptr = (double *)malloc(sizeof(double)*10);	
+	int *p = (int *)malloc(sizeof(int) * 10);
+	double *ptr = (double *)malloc(sizeof(double)*10);	
 
 	for(int i = 0; i < 10; i++){
 		p[i] = i * (rand() % 100);
-//		ptr[i] = 1.0;
+		ptr[i] = (rand() % 1000);
 	}
 
 	for(int i = 0; i < 10; i++)
 		printf("\np[%d] = %d\n", i, p[i]); 
 
 	for(int i = 0; i < 10; i++)
-		printf("\nptr[%d] = %f\n", i, ptr[i]);*/	
+		printf("\nptr[%d] = %f\n", i, ptr[i]);	
+	
+	printMem();
 
+	puts("\nFree ptr double");
+	free(ptr);
+	printMem();
+
+	puts("\nFree p int");
+	free(p);
+	printMem();
 }
