@@ -33,6 +33,57 @@ tnode *insert(tnode *begin, int num){
 	return begin;
 }
 
+tnode *delete(tnode *begin, int num){
+	if (begin == NULL) 
+		return NULL;
+	
+	if(begin->data < num){
+		if(begin->right == NULL) 
+			return begin;
+		else 
+			begin->right = delete(begin->right, num);
+	}else if(begin->data > num){
+		if(begin->left == NULL) 
+			return begin;
+		else 
+			begin->left = delete(begin->left, num);
+	}else{
+		if((begin->left == NULL) && (begin->right == NULL)){
+			free(begin);
+			return NULL;	
+		}else if(begin->left == NULL){  
+			tnode *p = begin->right;
+			if(begin == root) 
+				p = root;
+			free(begin);
+			return p;
+		}else if(begin->right == NULL){
+			tnode *p = begin->left;
+			if(begin == root) 
+				root = p;
+			free(begin);
+			return p;
+		}else{
+			tnode *p = begin->left;
+			while(p->right != NULL)
+				p = p->right;
+			
+			begin->data = p->data;
+		
+			if(begin->left == p)
+				begin->left = delete(p, p->data);
+			else{
+				tnode *q = begin->left;
+				while(q->right != p)	
+					q = q->right;
+				
+				q -> right = delete(p, p->data);
+			}
+		}
+	}
+	return begin;
+}
+
 void freeAll(tnode *begin){
 	if(begin == NULL) return;
 	freeAll(begin->right);
@@ -100,9 +151,20 @@ void inorderTraversal(tnode *begin){
 }
 
 void test4(){
-	for(int i = 0; i < 120; i++)
-		insert(root, (rand() % 1000));
+	int p[60];
+	int size = 0;
+	for(int i = 0; i < 120; i++){
+		int r = (rand() % 1000);
+		insert(root, r);
+		if(i%2){
+			p[size] = r;	
+			size++;
+		}
+	}
 	
+	for(int i = 0; i < 60; i++)
+		delete(root, p[i]);
+
 	inorderTraversal(root);
 	freeAll(root);
 }
