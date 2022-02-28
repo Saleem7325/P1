@@ -71,6 +71,8 @@ void printMem(){
 //to ptr->bsize so now there is only one large free block instead of many contiguous free blocks.
 //coalesce() should only be called with a node that is available.  
 void coalesce(node *ptr){
+	ptr = (node *)ptr;
+
 	if(outOfBounds(ptr, ptr->bsize))
 		return;
 	node *nnode = next(ptr, ptr->bsize);
@@ -190,8 +192,13 @@ void *mymalloc(size_t size, char *file, int line){
 }
 
 void myfree(void *ptr, char *file, int line){	
+	if(ptr == NULL){
+		printf("Error: calling free() with a NULL pointer in %s, at line %d.\n", file, line);
+		return;
+	}
+
 	if(firstCall){
-		printf("Error: calling free() with an address not obtained from malloc() in %s, at line %d.\n", __FILE__, __LINE__ );
+		printf("Error: calling free() with an address not obtained from malloc() in %s, at line %d.\n", file, line);
 		return;
 	}
 	
@@ -201,7 +208,7 @@ void myfree(void *ptr, char *file, int line){
 	unsigned long int last = (unsigned long int)(mem + MSIZE);
 
 	if(pv < first || pv >= last){
-		printf("Error: calling free() with an address not obtained from malloc() in %s, at line %d.\n", __FILE__, __LINE__ );
+		printf("Error: calling free() with an address not obtained from malloc() in %s, at line %d.\n", file, line );
 		return;
 	}
 	
@@ -213,7 +220,7 @@ void myfree(void *ptr, char *file, int line){
 		
 		if(test == p){
 				if(curr->available)
-					printf("Error: attempting to free a previously freed pointer in %s, at line %d.\n", __FILE__, __LINE__); 					
+					printf("Error: attempting to free a previously freed pointer in %s, at line %d.\n", file, line); 					
 				else
 					curr->available = 1;
 				coalesce(curr);
@@ -227,6 +234,6 @@ void myfree(void *ptr, char *file, int line){
 			break;
 	}
 
-	printf("Error: attempting to free address not at the start of the chunk in %s, at line %d.\n", __FILE__, __LINE__);
+	printf("Error: attempting to free address not at the start of the chunk in %s, at line %d.\n", file, line);
 }
 

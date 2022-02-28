@@ -58,7 +58,7 @@ void test3(){
 
 //Specified in Section 4(1-3) of p1.pdf
 int main(int argc, char** argv){
-	test1();
+/*	test1();
 	test2();
 	test3();
 
@@ -84,5 +84,42 @@ int main(int argc, char** argv){
 
 	puts("\nFree p int");
 	free(p);
+	printMem();*/
+	
+/*	char *p[120];
+	int *in[120];
+
+	for(int i = 0; i < 120; i++){
+		p[i] = malloc(sizeof(char));
+		in[i] = malloc(sizeof(int));
+	} 
+	
 	printMem();
+
+	for(int i = 0; i < 120; i++){
+		free(in[i]);
+		free(p[i]);
+	}
+
+	printMem();*/
+
+/*	int *a[120] = malloc(sizeof(int)*120);
+	double *b[120]= malloc(sizeof(double)*120);
+	char *c[120] = malloc(sizeof(char)*400);
+	
+	printMem();
+
+	puts("\nfree c\n");
+	free(c);	
+	printMem();
+	
+	puts("\nfree b\n");
+	free(b);
+	printMem();
+
+	puts("\nfree a\n");
+	free(a);
+	printMem();*/
+
+
 }
