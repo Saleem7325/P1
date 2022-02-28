@@ -168,6 +168,39 @@ void test4(){
 	inorderTraversal(root);
 	freeAll(root);
 }
+void test5(){
+    char *p[10];
+    for(int i = 0; i < 5; i++){
+        p[i] = malloc(sizeof(char)* 16);
+    }
+    p[5] = malloc(sizeof(char)* 8);
+    for(int i = 6; i < 10 ; i ++){
+        p[i] = malloc(sizeof(char) * 8);
+    }
+    free(p[5]); // creates a free block in the middle of unavailable blocks 
+    free(p[6]); //
+	p[6] = NULL;
+    p[5] = malloc(sizeof(char)* 24); //grabs first large enough memory that is available 
+    p[10] = malloc(sizeof(char)); 
+    for(int i = 0; i < 10 ; i++){
+		if(p[i] != NULL){
+        	free(p[i]);
+		}
+		
+    }
+	char *pt[127];
+	for(int i = 0; i < 127; i++){
+		pt[i] = malloc(sizeof(char)*24);
+	}
+	char *ptr = malloc(sizeof(char)); //shld print error as all the memory is already allocated
+	int r = (rand() % 127);
+	free(pt[r]);
+	pt[r]= malloc(sizeof(char)*28); // not enough space 
+	pt[r]= malloc(sizeof(char)*24); //this is enough after freeing some space
+	for(int i = 0; i < 127; i++){
+		free(pt[i]);
+	}
+}
 
 
 //Specified in Section 4(1-3) of p1.pdf
@@ -176,4 +209,5 @@ int main(int argc, char** argv){
 	test2();
 	test3();
 	test4();
+	test5();
 }
