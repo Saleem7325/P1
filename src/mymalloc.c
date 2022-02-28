@@ -13,7 +13,6 @@ typedef struct metadata{
 }node;
 
 static char mem[MSIZE];
-// static node *head = (node *)mem;
 static node *head;
 
 //This is intially set to 1 to indicate to mymalloc 
@@ -37,15 +36,11 @@ node *next(void *ptr, int bsize){
 int outOfBounds(void *ptr, int bsize){
 	ptr = (char *)ptr;
 
-
-//	char *last = (char *)(mem + MSIZE);
-	//ptr =(char *)(ptr + sizeof(node) + bsize);
-
 	unsigned long int ptrAddress = (unsigned long int)ptr;
 	unsigned long int last = (unsigned long int)(mem + MSIZE);
 	ptrAddress = (ptrAddress + sizeof(node) + bsize);
 
-	if(ptrAddress >= last /*|| (void *)ptr > (void *)last*/ )
+	if(ptrAddress >= last)
 		return 1;
 	return 0;	
 }
@@ -143,12 +138,9 @@ int findSize4(int size){
 }
 
 void *mymalloc(size_t size, char *file, int line){
-
 	if(firstCall){
 		firstCall = 0;
 		init();
-	//	head->available = 1;
-	//	head->bsize = MSIZE - sizeof(node);		
 	}
 
 	if((size % 4) != 0)
@@ -158,7 +150,6 @@ void *mymalloc(size_t size, char *file, int line){
 
 	while(1){
 
-		//Find free node
 		while(!ptr->available){
 			if(outOfBounds(ptr, ptr->bsize))
 				return NULL;
