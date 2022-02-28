@@ -58,68 +58,7 @@ void test3(){
 
 //Specified in Section 4(1-3) of p1.pdf
 int main(int argc, char** argv){
-/*	test1();
+	test1();
 	test2();
 	test3();
-
-	int *p = (int *)malloc(sizeof(int) * 10);
-	double *ptr = (double *)malloc(sizeof(double)*10);	
-
-	for(int i = 0; i < 10; i++){
-		p[i] = i * (rand() % 100);
-		ptr[i] = (rand() % 1000);
-	}
-
-	for(int i = 0; i < 10; i++)
-		printf("\np[%d] = %d\n", i, p[i]); 
-
-	for(int i = 0; i < 10; i++)
-		printf("\nptr[%d] = %f\n", i, ptr[i]);	
-	
-	printMem();
-
-	puts("\nFree ptr double");
-	free(ptr);
-	printMem();
-
-	puts("\nFree p int");
-	free(p);
-	printMem();*/
-	
-/*	char *p[120];
-	int *in[120];
-
-	for(int i = 0; i < 120; i++){
-		p[i] = malloc(sizeof(char));
-		in[i] = malloc(sizeof(int));
-	} 
-	
-	printMem();
-
-	for(int i = 0; i < 120; i++){
-		free(in[i]);
-		free(p[i]);
-	}
-
-	printMem();*/
-
-/*	int *a[120] = malloc(sizeof(int)*120);
-	double *b[120]= malloc(sizeof(double)*120);
-	char *c[120] = malloc(sizeof(char)*400);
-	
-	printMem();
-
-	puts("\nfree c\n");
-	free(c);	
-	printMem();
-	
-	puts("\nfree b\n");
-	free(b);
-	printMem();
-
-	puts("\nfree a\n");
-	free(a);
-	printMem();*/
-
-
 }
