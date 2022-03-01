@@ -168,36 +168,45 @@ void test4(){
 	inorderTraversal(root);
 	freeAll(root);
 }
+// this test case tests 2 things:
+// the first half shows that when a block is freed adjacent to unavailable blocks and 
+// when malloc is called again it will retrieve the nearest block that has enough free memory for the requested size
+// the second half tests that after there are no more available blocks left
+// memory can no longer be allocated, but once a block is freed, 
+// malloc can be called again if the chunk is big enough for what the client requested
 void test5(){
     char *p[10];
     for(int i = 0; i < 5; i++){
         p[i] = malloc(sizeof(char)* 16);
     }
     p[5] = malloc(sizeof(char)* 8);
-    for(int i = 6; i < 10 ; i ++){
+    for(int i = 6; i < 9 ; i ++){
         p[i] = malloc(sizeof(char) * 8);
     }
-    free(p[5]); // creates a free block in the middle of unavailable blocks 
-    free(p[6]); //
+    free(p[5]); 
+    free(p[6]); 
 	p[6] = NULL;
-    p[5] = malloc(sizeof(char)* 24); //grabs first large enough memory that is available 
-    p[10] = malloc(sizeof(char)); 
+    p[5] = malloc(sizeof(char)* 24);  
+    p[9] = malloc(sizeof(char)); 
     for(int i = 0; i < 10 ; i++){
-		if(p[i] != NULL){
-        	free(p[i]);
-		}
+		if(p[i]!= NULL) free(p[i]);
 		
     }
-	char *pt[127];
-	for(int i = 0; i < 127; i++){
+	// second half of test case
+	char *pt[128];
+	for(int i = 0; i < 128; i++){
 		pt[i] = malloc(sizeof(char)*24);
 	}
-	char *ptr = malloc(sizeof(char)); //shld print error as all the memory is already allocated
+	char *ptr = malloc(sizeof(char)); 
+	if(ptr != NULL){
+		free(ptr);
+	}else{
+		printf("not enough\n");
+	}
 	int r = (rand() % 127);
 	free(pt[r]);
-	pt[r]= malloc(sizeof(char)*28); // not enough space 
-	pt[r]= malloc(sizeof(char)*24); //this is enough after freeing some space
-	for(int i = 0; i < 127; i++){
+	pt[r]= malloc(sizeof(char)*24); 
+	for(int i = 0; i < 128; i++){
 		free(pt[i]);
 	}
 }
