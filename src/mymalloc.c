@@ -70,13 +70,13 @@ void coalesce(node *ptr){
 
 	if(outOfBounds(ptr, ptr->bsize))
 		return;
-	node *nnode = next(ptr, ptr->bsize);
+	node *nextNode = next(ptr, ptr->bsize);
 	
-	while(nnode->available){
-		ptr->bsize = ptr->bsize + sizeof(node) + nnode->bsize;
+	while(nextNode->available){
+		ptr->bsize = ptr->bsize + sizeof(node) + nextNode->bsize;
 		if(outOfBounds(ptr, ptr->bsize))
 			return;
-		nnode = next(nnode, nnode->bsize);
+		nextNode = next(ptr, ptr->bsize);
 	}
 	return;
 }
@@ -90,32 +90,39 @@ void createNode(node *ptr, int oldSize){
 
 	int size = ptr->bsize;
 
-	if (sizeof(node) + 4 < oldSize-(size + sizeof(node))){
-
-		char *nna = (char *)ptr;
-		nna = nna + sizeof(node) + size;
-		node *newNode = (node *)nna;	
+	if (sizeof(node) + 8 < oldSize-(size + sizeof(node))){
+		char *newNodeAddress = (char *)ptr;
+		newNodeAddress = newNodeAddress + sizeof(node) + size;
+		node *newNode = (node *)newNodeAddress;	
 		newNode->available = 1;
 		newNode->bsize = oldSize-(size + sizeof(node));
 		coalesce(newNode);
-	}
+	}else
+		ptr->bsize = oldSize;
+	
 }
 
+//Since the ilab require structs of 8 bytes to be in an address divisible by 8, this 
+//method takes a pointer to an address and finds an address greater than the address given
+//the given pointers address that is also divisble by 8. If the address given is already divisible by 8
+//it returns that address.
 void *findAlignedAddress(void *ptr){
 	unsigned long int p = (unsigned long int)ptr;
 	unsigned long int i = 1;
 
-	while((p % 4) != 0)
+	while((p % 8) != 0)
 		p = p + i;
 
 	return (void *)p;
 }
 
+//This method initializes head to point to the first aligned address in mem and
+//calculates the block size and stores it in head, and sets available to 1;
 void init(){
 	char *p = mem;
 	unsigned long int pv = (unsigned long int)p;	
 
-	if((pv % 4) != 0)
+	if((pv % 8) != 0)
 		 p = (char *)findAlignedAddress(p);
 	
 	head = (node *)p;
@@ -127,24 +134,30 @@ void init(){
 	head->bsize =  ( 4096 - ( sizeof(node *) + (pv -  m) ) );
 }
 
-int findSize4(int size){
+//Since all of our addresses need to be divisisble by 8, I extended this property to all blocks
+//in mem so that we dont have free pieces of memory between blocks and nodes due to node addresses 
+//needing to be divisible by 8
+int findSize8(int size){
 	int p = size;
 	int i = 1;
 
-	while((p % 4) != 0)
+	while((p % 8) != 0)
 		p = p + i;
 
 	return p;
 }
 
+//mymalloc takes a requested size of bytes to store in mem, along with the file name and line number
+//of the call to mymalloc. If the number of bytes requested is available in mem, mymalloc returns a void *
+//to a block in mem of the size requested. If the number of bytes is not available mymalloc returns NULL.
 void *mymalloc(size_t size, char *file, int line){
 	if(firstCall){
 		firstCall = 0;
 		init();
 	}
 
-	if((size % 4) != 0)
-		size = findSize4(size);
+	if((size % 8) != 0)
+		size = findSize8(size);
 
 	node *ptr = head;
 
@@ -182,6 +195,13 @@ void *mymalloc(size_t size, char *file, int line){
 
 }
 
+//myfree takes a pointer, the file name, and line number of the call. If the pointer is NULL
+//myfree prints an error message reporting a NULL pointer, if the pointer is not within the bounds
+//of mem, myfree prints an error mesage reporting the pointer is not from mymalloc, if the pointer
+//is not at the beginnning of a block but within the bounds of mem, myfree prints an error reporting
+//that the pointer is not at the beginning of a block, if the pointer contains an address of a free 
+//block myfree prints an error message reporting a myfree call on a free pointer. If none of these
+// happens to be the case myfree free the block pointed to by ptr and colesces it.
 void myfree(void *ptr, char *file, int line){	
 	if(ptr == NULL){
 		printf("Error: calling free() with a NULL pointer in %s, at line %d.\n", file, line);

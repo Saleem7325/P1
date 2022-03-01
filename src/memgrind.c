@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/time.h>
 #include "mymalloc.h"
 
+//Tree node for binary search tree
 typedef struct treeNode{
 	int data;
 	struct treeNode *left;
@@ -10,15 +12,17 @@ typedef struct treeNode{
 
 tnode *root = NULL;
 
+//Insert method takes the root node and a int and inserts it
+//in the correct place in the binary search tree
 tnode *insert(tnode *begin, int num){
 	if(root == NULL){
-		root = malloc(sizeof(tnode));
+		root = (tnode *)malloc(sizeof(tnode));
 		root->data =num;
 		root->left = NULL;
 		root->right = NULL;
 		return root;
 	}else if(begin == NULL){		
-		tnode * p  = malloc(sizeof(tnode));
+		tnode *p  = (tnode *)malloc(sizeof(tnode));
 		p->data = num;
 		p->left = NULL;
 		p->right = NULL;
@@ -33,6 +37,8 @@ tnode *insert(tnode *begin, int num){
 	return begin;
 }
 
+//delete take a root of a bst and a number to delete and deletes that
+//number from the bst
 tnode *delete(tnode *begin, int num){
 	if (begin == NULL) 
 		return NULL;
@@ -54,7 +60,7 @@ tnode *delete(tnode *begin, int num){
 		}else if(begin->left == NULL){  
 			tnode *p = begin->right;
 			if(begin == root) 
-				p = root;
+				root = p;
 			free(begin);
 			return p;
 		}else if(begin->right == NULL){
@@ -77,13 +83,15 @@ tnode *delete(tnode *begin, int num){
 				while(q->right != p)	
 					q = q->right;
 				
-				q -> right = delete(p, p->data);
+				q->right = delete(p, p->data);
 			}
 		}
 	}
 	return begin;
 }
 
+//freeAll takes the root of a bst and frees all the tnodes
+//of the tree through post order traversal
 void freeAll(tnode *begin){
 	if(begin == NULL) return;
 	freeAll(begin->right);
@@ -91,6 +99,8 @@ void freeAll(tnode *begin){
 	free(begin);
 }
 
+//freePtr takes an array of char * and a boolean values indicating whethter to 
+//free every pointer in the array or just one pointer
 void freePtr(char *p[], int b){
 	for(int i = 0; i < 120; i++){
 		if(p[i] != NULL){
@@ -101,11 +111,13 @@ void freePtr(char *p[], int b){
 	}
 }
 
+//setNull sets every index in p to NULL
 void setNULL(char *p[]){
 	for(int i = 0; i < 120; i++)
 		p[i] = NULL;
 }
 
+//Specified in Section 4(1-3) of p1.pdf
 void test1(){
 	for(int i = 0; i < 120; i++){
 		char *ptr = malloc(sizeof(char));
@@ -113,6 +125,7 @@ void test1(){
 	}
 }
 
+//Specified in Section 4(1-3) of p1.pdf
 void test2(){
 	char *p[120];
 	for(int i = 0; i < 120; i++)
@@ -120,6 +133,7 @@ void test2(){
 	freePtr(p, 0);
 }
 
+//Specified in Section 4(1-3) of p1.pdf
 void test3(){
 	int malCount = 0;
 	int size = 0;
@@ -143,6 +157,7 @@ void test3(){
 	freePtr(p, 0);
 }
 
+//Prints every number in the bst in order
 void inorderTraversal(tnode *begin){
 	if(begin == NULL) return;
 	inorderTraversal(begin->left);
@@ -150,6 +165,8 @@ void inorderTraversal(tnode *begin){
 	inorderTraversal(begin->right);
 }
 
+//Inserts 120 random numbers into a bst and then deletes 60 random numbers 
+//in the bst. Prints all the numbers in bst to stdout, then frees all tnodes..
 void test4(){
 	int p[60];
 	int size = 0;
@@ -167,7 +184,9 @@ void test4(){
 
 	inorderTraversal(root);
 	freeAll(root);
+	root = NULL;
 }
+
 // this test case tests 2 things:
 // the first half shows that when a block is freed adjacent to unavailable blocks and 
 // when malloc is called again it will retrieve the nearest block that has enough free memory for the requested size
@@ -211,12 +230,73 @@ void test5(){
 	}
 }
 
+//Computes the average of all the entries in nums and returns average
+double averageTime(double nums[]){
+	double total = 0;
+	for(int i = 0; i < 50; i++)
+		total = total + nums[i];
+	return (total/50);
+}
+
+//runs test1, test2, test3, test4, and test5 50 times and times each run
+//then prints the average of each test to stdout
+void runTests(){
+	double test1times[50];
+	double test2times[50];
+	double test3times[50];
+	double test4times[50];
+	double test5times[50];	
+
+	for(int i = 0; i < 50; i++){
+
+		struct timeval tv1;
+		gettimeofday(&tv1, NULL);
+		test1();
+		struct timeval tv12;
+		gettimeofday(&tv12, NULL);
+		int time1 = tv12.tv_usec - tv1.tv_usec;
+		test1times[i] = time1;		
+
+		struct timeval tv2;
+		gettimeofday(&tv2, NULL);
+		test2();
+		struct timeval tv22;
+		gettimeofday(&tv22, NULL);
+		int time2 = tv22.tv_usec - tv2.tv_usec;
+		test2times[i] = time2;		
+
+		struct timeval tv3;
+		gettimeofday(&tv3, NULL);
+		test3();
+		struct timeval tv32;
+		gettimeofday(&tv32, NULL);
+		int time3 = tv32.tv_usec - tv3.tv_usec;
+		test3times[i] = time3;
+
+		struct timeval tv4;
+		gettimeofday(&tv4, NULL);
+		test4();
+		struct timeval tv42;
+		gettimeofday(&tv42, NULL);
+		int time4 = tv42.tv_usec - tv4.tv_usec;
+		test4times[i] = time4;
+	
+		struct timeval tv5;
+		gettimeofday(&tv5, NULL);
+		test5();
+		struct timeval tv52;
+		gettimeofday(&tv52, NULL);
+		int time5 = tv52.tv_usec - tv5.tv_usec;
+		test5times[i] = time5;
+	}		
+	printf("\nAverage time for test1 : %lf microseconds", averageTime(test1times));
+	printf("\nAverage time for test2 : %lf microseconds", averageTime(test2times));	
+	printf("\nAverage time for test3 : %lf microseconds", averageTime(test3times));
+	printf("\nAverage time for test4 : %lf microseconds", averageTime(test4times));
+	printf("\nAverage time for test5 : %lf microseconds\n", averageTime(test5times));
+}
 
 //Specified in Section 4(1-3) of p1.pdf
 int main(int argc, char** argv){
-	test1();
-	test2();
-	test3();
-	test4();
-	test5();
+	runTests();
 }
