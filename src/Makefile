@@ -1,9 +1,8 @@
 CC = gcc
 CFLAGS = -g -std=c99 -Wall -Wvla -Werror -fsanitize=address,undefined
-FILES = mymalloc.c mymalloc.h memgrind.c bst.c bst.h 
 
-final:
-	$(CC) $(CFLAGS) $(FILES) -o p1  	
+p1: mymalloc.h mymalloc.c bst.h bst.c memgrind.c
+	$(CC) $(CFLAGS) -o $@ $^  	
 
 clean:
 	rm -rf *o *a *dylib *dSYM

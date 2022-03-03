@@ -157,9 +157,9 @@ void init(){
 }
 
 /*
-* Since our nodes can only be stored in addresses divisble by 8 due to alignment requirements
-* our block sizes are also divisible by 9 to ensure all of our nodes can be placed immediately
-* following a node so no bytes go unused/untracked.
+* Since our nodes can only be stored in addresses divisble by ALIGN due to alignment requirements
+* our block sizes are also divisible by ALIGN to ensure all of our nodes can be placed immediately
+* following a block so no bytes go unused/untracked and so we don't get alignment errors.
 */
 int findAlignedSize(int size){
 	int p = size;
@@ -226,7 +226,7 @@ void *mymalloc(size_t size, char *file, int line){
 * is not at the beginnning of a block but within the bounds of mem, myfree prints an error reporting
 * that the pointer is not at the beginning of a block, if the pointer contains an address of a free 
 * block myfree prints an error message reporting a myfree call on a free pointer. If none of these
-* happens to be the case myfree free the block pointed to by ptr and colesces it.
+* happens to be the case myfree frees the block pointed to by ptr and colesces it.
 */
 void myfree(void *ptr, char *file, int line){	
 	if(ptr == NULL){

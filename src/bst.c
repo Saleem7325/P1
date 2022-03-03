@@ -33,8 +33,11 @@ tnode *insert(tnode *begin, int num){
 }
 
 /*
-* delete take a root of a bst and a number to delete and deletes that
-* number from the bst
+* delete take the root node and a number to delete and deletes that
+* number from the bst if it exsists. In the case of a node having two
+* children and needing to be deleted, that node is replaced with the 
+* right most node in the left subtree and the right most node in the 
+* left subtree is deleted.. 
 */
 tnode *delete(tnode *begin, int num){
 	if (begin == NULL) 

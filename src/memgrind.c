@@ -28,7 +28,9 @@ void setNULL(char *p[]){
 		p[i] = NULL;
 }
 
-//Specified in Section 4(1-3) of p1.pdf
+/*
+* test1 mallocs a byte chunk then immeditely free it 120 times
+*/
 void test1(){
 	for(int i = 0; i < 120; i++){
 		char *ptr = malloc(sizeof(char));
@@ -36,7 +38,9 @@ void test1(){
 	}
 }
 
-//Specified in Section 4(1-3) of p1.pdf
+/*
+* test2 mallocs 120 one byte chucks then frees all of them
+*/
 void test2(){
 	char *p[120];
 	for(int i = 0; i < 120; i++)
@@ -44,7 +48,13 @@ void test2(){
 	freePtr(p, 0);
 }
 
-//Specified in Section 4(1-3) of p1.pdf
+/*
+* test3 randomly chooses between: allocating a one byte chunk and 
+* storing the pointer returned in an array or deallocating one of
+* pointers in the array if any. It repeats this process until
+* mymalloc has been called 120 times, then all of the pointers
+* are freed.
+*/
 void test3(){
 	int malCount = 0;
 	int size = 0;
@@ -70,8 +80,8 @@ void test3(){
 
 /*
 * test4 inserts 128 random numbers into a bst which is the maximum numbers we can store using mymalloc and then
-* deletes have of them randomly, then prints them inorder to check if any data got corrupted. After printing
-* out bst is then freed
+* deletes half of them randomly, then prints them inorder to check if any data got corrupted. After printing
+* the node values to stdout the bst nodes are freed.
 */
 void test4(){
 	int p[64];
@@ -94,7 +104,7 @@ void test4(){
 }
 
 /*
-* test2 does two things:
+* test5 does two things:
 * the first half shows that when a block is freed adjacent to unavailable blocks and 
 * when malloc is called again it will retrieve the nearest block that has enough free memory for the requested size
 * the second half tests that after there are no more available blocks left
@@ -160,7 +170,7 @@ void runTests(){
 	double test5times[50];	
 
 	for(int i = 0; i < 50; i++){
-
+		//Time test1
 		struct timeval tv1;
 		gettimeofday(&tv1, NULL);
 		test1();
@@ -168,7 +178,8 @@ void runTests(){
 		gettimeofday(&tv12, NULL);
 		int time1 = tv12.tv_usec - tv1.tv_usec;
 		test1times[i] = time1;		
-
+		
+		//Time test2
 		struct timeval tv2;
 		gettimeofday(&tv2, NULL);
 		test2();
@@ -177,6 +188,7 @@ void runTests(){
 		int time2 = tv22.tv_usec - tv2.tv_usec;
 		test2times[i] = time2;		
 
+		//Time test3
 		struct timeval tv3;
 		gettimeofday(&tv3, NULL);
 		test3();
@@ -185,6 +197,7 @@ void runTests(){
 		int time3 = tv32.tv_usec - tv3.tv_usec;
 		test3times[i] = time3;
 
+		//Time test4
 		struct timeval tv4;
 		gettimeofday(&tv4, NULL);
 		test4();
@@ -193,6 +206,7 @@ void runTests(){
 		int time4 = tv42.tv_usec - tv4.tv_usec;
 		test4times[i] = time4;
 	
+		//Time test5
 		struct timeval tv5;
 		gettimeofday(&tv5, NULL);
 		test5();
@@ -209,7 +223,7 @@ void runTests(){
 }
 
 /*
-* calls runTests() to test mymalloc
+* calls runTests() to test mymalloc/myfree
 */
 int main(int argc, char** argv){
 	runTests();
